@@ -1,0 +1,5 @@
+{
+  "return_window_days": 30,
+  "returnable_statuses": ["Delivered", "Shipped"],
+  "store_name": "Cedar & Co."
+}

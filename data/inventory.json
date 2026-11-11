@@ -1,0 +1,26 @@
+{
+  "CEDAR-MUG-01": {
+    "name": "Cedar Ceramic Mug",
+    "stock_count": 42,
+    "low_stock_threshold": 15,
+    "price": 18.00
+  },
+  "CEDAR-THROW-02": {
+    "name": "Cedar Wool Throw Blanket",
+    "stock_count": 6,
+    "low_stock_threshold": 10,
+    "price": 65.00
+  },
+  "CEDAR-CANDLE-03": {
+    "name": "Cedar Soy Candle",
+    "stock_count": 3,
+    "low_stock_threshold": 20,
+    "price": 24.00
+  },
+  "CEDAR-TRAY-04": {
+    "name": "Cedar Oak Serving Tray",
+    "stock_count": 28,
+    "low_stock_threshold": 12,
+    "price": 39.00
+  }
+}

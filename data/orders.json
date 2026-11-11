@@ -1,0 +1,34 @@
+{
+  "ORD-3001": {
+    "customer": "Layla Ahmed",
+    "items": ["Cedar Ceramic Mug", "Cedar Soy Candle"],
+    "status": "Delivered",
+    "ordered_days_ago": 12,
+    "delivery_days": 5,
+    "amount": 42.00
+  },
+  "ORD-3002": {
+    "customer": "Noah Ibrahim",
+    "items": ["Cedar Wool Throw Blanket"],
+    "status": "Shipped",
+    "ordered_days_ago": 4,
+    "delivery_days": 6,
+    "amount": 65.00
+  },
+  "ORD-3003": {
+    "customer": "Emma Davies",
+    "items": ["Cedar Oak Serving Tray"],
+    "status": "Processing",
+    "ordered_days_ago": 1,
+    "delivery_days": 7,
+    "amount": 39.00
+  },
+  "ORD-3004": {
+    "customer": "Ali Hassan",
+    "items": ["Cedar Ceramic Mug"],
+    "status": "Delivered",
+    "ordered_days_ago": 114,
+    "delivery_days": 5,
+    "amount": 18.00
+  }
+}
