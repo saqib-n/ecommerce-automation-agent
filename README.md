@@ -26,6 +26,12 @@
 
 <br>
 
+<h2>See it in action</h2>
+
+<p align="center"><img src="demo/demo.gif" alt="Terminal recording of E-commerce Order and Inventory Agent running on Google Gemini" width="100%"></p>
+
+<p align="center"><sub>Recorded from a real run on Google Gemini (<code>gemini-3.5-flash-lite</code>) on 13 November 2026. Nothing is edited or scripted. Only the waiting time while the model thinks is shortened. <a href="demo/demo.mp4">Download the MP4</a>.</sub></p>
+
 <h2>The problem</h2>
 
 <p>In a small online store, "where is my order", "is this in stock" and "can I return this" make up most of the support inbox. The questions repeat, the answers sit in the store data, and someone still types them out by hand.</p>
@@ -122,21 +128,77 @@ python stock_monitor.py    # run the low-stock check once
 
 <pre>
 ecommerce-automation-agent/
-  .env.example           # copy to .env and add your key
-  app.py                 # customer support chat
-  case_study.md          # longer write-up of the design
+  .env.example                                           # copy to .env and add your key
+  app.py                                                 # customer support chat
+  case_study.md                                          # longer write-up of the design
   README.md
-  requirements.txt       # dependencies
-  stock_monitor.py       # low-stock check, meant to run on a schedule
+  requirements.txt                                       # dependencies
+  stock_monitor.py                                       # low-stock check, meant to run on a schedule
+  .git/
+    COMMIT_EDITMSG
+    config
+    description
+    HEAD
+    hooks/applypatch-msg.sample
+    hooks/commit-msg.sample
+    hooks/fsmonitor-watchman.sample
+    hooks/post-update.sample
+    hooks/pre-applypatch.sample
+    hooks/pre-commit.sample
+    hooks/pre-merge-commit.sample
+    hooks/pre-push.sample
+    hooks/pre-rebase.sample
+    hooks/pre-receive.sample
+    hooks/prepare-commit-msg.sample
+    hooks/push-to-checkout.sample
+    hooks/sendemail-validate.sample
+    hooks/update.sample
+    index
+    info/exclude
+    logs/HEAD
+    logs/refs/heads/main
+    logs/refs/remotes/origin/main
+    objects/03/0830eda43da2f72e1105c14aa1632a4b8bd4ae
+    objects/05/9be6b2dba16839158dd877e4ca227694b27e41
+    objects/0a/d7e0118665e880d9414a37297ae226a03d6ee6
+    objects/0d/19a37d674a332b9dba9f34ec54f3144a81a21f
+    objects/11/7e582f3e3a60902ac4b3222a66957d916138ab
+    objects/1c/b1e54648029d9aae9837e7bd70e9af5bc12b00
+    objects/38/1869dc8435e67cc98ec2b38cac9659a66ef744
+    objects/48/46efbf80c2dc18bca582aed767ccf8a4ef5f3f
+    objects/5b/0072aee02e89cb1b820d22e2ba37b494b8077b
+    objects/64/96b1270f9e2d226763d188d5df57bcd586ae64
+    objects/6f/808cf24c6b568d43f651dc57a25c17857ffa08
+    objects/78/998da0758f803a8b7d9b492206632524003f81
+    objects/79/85154b202a46903b7843ac1d4c0a1ceef31a91
+    objects/7a/3a4f0ab20b8170a7b714479283340f5fe09e10
+    objects/a2/667477f906e25e4d46862b73a0cf1d10163a78
+    objects/aa/5f00444008faba2a44f316f8cae9b0abb7c02b
+    objects/ba/75575cf26c725df94e1083add597c886800973
+    objects/bb/1d0d20270c6b562a687dd6c5e21f3c4d7ba090
+    objects/be/d1d9d63036918d917ba2bfa7f42da5a0e5e1f9
+    objects/c5/4aeb32cf364cf433dfb7c8ce58583bc231b3a2
+    objects/c5/97c23fa30e7a1e2dfac8278bb520f879e325c9
+    objects/c5/b13bae1c9d6d14046d3c87f6118bc295765771
+    objects/e5/6d0464232e3f00c54b6317bcda0a87126ef783
+    objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+    objects/ef/6c83c316f50b31a9563f9761b59a0c71f90001
+    objects/f0/4cfd5c7ae8e2e63fb8d49d3196e2810a5fa1d0
+    objects/f6/95549d9b80a85f5b0fa66d4617bed083849dbe
+    refs/heads/main
+    refs/remotes/origin/main
   agent/
-    graph.py             # classifier and the four handlers
-    llm.py               # picks the model from LLM_MODEL
-    shopify_client.py    # Shopify Admin API with the local demo fallback
+    graph.py                                             # classifier and the four handlers
+    llm.py                                               # picks the model from LLM_MODEL
+    shopify_client.py                                    # Shopify Admin API with the local demo fallback
   data/
-    inventory.json       # demo stock levels and thresholds
-    orders.json          # demo orders
-    store_policy.json    # return window and returnable statuses
-  tests/                 # pytest suite, runs without any API key
+    inventory.json                                       # demo stock levels and thresholds
+    orders.json                                          # demo orders
+    store_policy.json                                    # return window and returnable statuses
+  demo/
+    demo.gif
+    demo.mp4
+  tests/                                                 # pytest suite, runs without any API key
 </pre>
 
 <h2>Built with</h2>
