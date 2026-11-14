@@ -28,9 +28,11 @@
 
 <h2>See it in action</h2>
 
-<p align="center"><img src="demo/demo.gif" alt="Terminal recording of E-commerce Order and Inventory Agent running on Google Gemini" width="100%"></p>
+<p align="center"><img src="demo/demo.gif" alt="Store dashboard: live inventory and orders in the middle, the customer support chat on the right, and the low-stock alert" width="100%"></p>
 
-<p align="center"><sub>Recorded from a real run on Google Gemini (<code>gemini-3.5-flash-lite</code>) on 13 November 2026. Nothing is edited or scripted. Only the waiting time while the model thinks is shortened. <a href="demo/demo.mp4">Download the MP4</a>.</sub></p>
+<p align="center"><sub>Recorded in the built-in store dashboard from a real run on Google Gemini (<code>gemini-3.1-flash-lite</code>) on 14 November 2026. Nothing is scripted. Only the time spent waiting for the model is fast-forwarded, and the real response times are shown on screen. <a href="demo/demo.mp4">Download the MP4</a>.</sub></p>
+
+<p>Run <code>python app.py</code> and it opens a store dashboard with the inventory, the orders, the customer support chat and a button that runs the stock monitor. It is the same agent code as the command line version, with a screen on top.</p>
 
 <h2>The problem</h2>
 
@@ -61,7 +63,7 @@ customer message --&gt; classify --+--&gt; order_status  --&gt; Shopify order lo
 stock_monitor.py (on a schedule) --&gt; scan inventory --&gt; Slack alert
 </pre>
 
-<p><code>app.py</code> is the customer-facing side: a LangGraph graph that classifies each message and routes it to one of four handlers. <code>stock_monitor.py</code> is the proactive side: a script meant to run on a schedule. Both share the same data layer in <code>agent/shopify_client.py</code>.</p>
+<p>The customer-facing side is <code>agent/graph.py</code>: a LangGraph graph that classifies each message and routes it to one of four handlers. <code>stock_monitor.py</code> is the proactive side: a script meant to run on a schedule. Both share the same data layer in <code>agent/shopify_client.py</code>.</p>
 
 <p>The return policy lives in <code>data/store_policy.json</code>, not in the code. A new store with a 14-day window instead of 30 is a one-line config change.</p>
 
@@ -80,7 +82,7 @@ stock_monitor.py (on a schedule) --&gt; scan inventory --&gt; Slack alert
 <p>Order and stock answers from a real run on Google Gemini, plus the return and escalation paths:</p>
 
 <pre>
-$ python app.py
+$ python chat_cli.py
 You: Where is order ORD-3001?
 Agent [order_status]: Order ORD-3001 (Cedar Ceramic Mug, Cedar Soy Candle) is currently Delivered.
 
@@ -105,7 +107,8 @@ Low stock alert, Cedar &amp; Co.
 pip install -r requirements.txt
 cp .env.example .env        # on Windows: copy .env.example .env
 # open .env and paste your API key
-python app.py              # chat with the support agent
+python app.py              # opens the store dashboard at http://localhost:8000
+python chat_cli.py         # the same support chat in the terminal
 python stock_monitor.py    # run the low-stock check once
 </pre>
 
@@ -129,7 +132,8 @@ python stock_monitor.py    # run the low-stock check once
 <pre>
 ecommerce-automation-agent/
   .env.example           # copy to .env and add your key
-  app.py                 # customer support chat
+  app.py                 # browser dashboard: support chat, inventory, stock monitor
+  chat_cli.py            # support chat in the terminal
   case_study.md          # longer write-up of the design
   README.md
   requirements.txt       # dependencies
@@ -142,8 +146,10 @@ ecommerce-automation-agent/
     inventory.json       # demo stock levels and thresholds
     orders.json          # demo orders
     store_policy.json    # return window and returnable statuses
-  demo/                  # recording of a live run (GIF and MP4)
+  demo/                  # recording of a live run (GIF, MP4 and a screenshot)
   tests/                 # pytest suite, runs without any API key
+  web/
+    index.html          # the store dashboard, one file, no build step
 </pre>
 
 <h2>Built with</h2>
@@ -157,7 +163,7 @@ pip install -r requirements-dev.txt
 pytest
 </pre>
 
-<p>Eight tests cover product matching from a customer's sentence, the return policy rules, the Shopify status mapping, the low-stock check and the classifier's routing. None of the tests call a model or need an API key, so they run on GitHub Actions on every push. The badge at the top shows the latest result.</p>
+<p>Ten tests cover product matching from a customer's sentence, the return policy rules, the Shopify status mapping, the low-stock check and the classifier's routing, plus the browser screen and its API. None of the tests call a model or need an API key, so they run on GitHub Actions on every push. The badge at the top shows the latest result.</p>
 
 <h2>Roadmap</h2>
 

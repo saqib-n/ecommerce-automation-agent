@@ -14,7 +14,7 @@ Order status and return questions are most of a small store's support volume, an
 
 Running out of a popular item without warning is a different problem entirely. It costs sales, nobody asks a question that would surface it, and in most small shops someone just notices a few days late.
 
-These get solved differently. One is a conversation. The other is a cron job. Building them as one thing would have made both worse, so `app.py` and `stock_monitor.py` are separate entry points sharing a data layer.
+These get solved differently. One is a conversation. The other is a cron job. Building them as one thing would have made both worse, so the support chat (`chat_cli.py`, and the `app.py` dashboard) and `stock_monitor.py` are separate entry points sharing a data layer.
 
 The second one is also the more interesting demo. An agent that answers questions is expected now. An agent that noticed something and told you first lands differently in a client call.
 

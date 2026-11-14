@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Store Support Agent</title>
+<style>
+  :root {
+    --bg: #f6f4f1; --surface: #fff; --line: #e8e3dc; --line-2: #f1ede7;
+    --text: #221d19; --muted: #73695f; --faint: #a89d92;
+    --nav: #1f1a17; --nav-text: #cbbfb3;
+    --brand: #b5582a; --brand-2: #9c4a22; --brand-soft: #fbeee6;
+    --ok: #2b8a3e; --ok-bg: #e6f4ea; --low: #c92a2a; --low-bg: #fdecea; --info: #1c7ed6; --info-bg: #e7f1fc; --warn: #b26a00; --warn-bg: #fff4dc;
+    --flash: #fff1b8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif; display: flex; overflow: hidden; }
+  button { font: inherit; cursor: pointer; }
+
+  .nav { width: 200px; flex: none; background: var(--nav); color: var(--nav-text); padding: 16px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .store { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 650; padding: 2px 8px 18px; }
+  .store .mark { width: 30px; height: 30px; border-radius: 8px; background: var(--brand); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+  .store small { display: block; color: var(--nav-text); font-weight: 400; font-size: 11.5px; }
+  .nav a { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 8px; color: inherit; text-decoration: none; font-size: 13.5px; }
+  .nav a.on { background: rgba(255,255,255,.08); color: #fff; }
+  .nav a svg { fill: currentColor; opacity: .85; }
+  .nav .foot { margin-top: auto; font-size: 11.5px; padding: 8px 10px; color: #8f8478; }
+  .nav .foot b { color: var(--nav-text); font-weight: 600; display: block; }
+
+  .main { flex: 1; min-width: 0; overflow-y: auto; padding: 18px 22px 26px; }
+  .head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .head h1 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+  .head .sub { color: var(--muted); font-size: 13px; }
+  .spacer { flex: 1; }
+  .pill { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; background: var(--surface); white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+  .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .kpi span { color: var(--muted); font-size: 12.5px; }
+  .kpi b { display: block; font-size: 23px; letter-spacing: -.02em; margin-top: 2px; }
+  .kpi.alert b { color: var(--low); }
+  .kpi.bump { animation: bump .6s ease; }
+  @keyframes bump { 40% { transform: scale(1.04); border-color: var(--brand); } }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .panel-head { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--line-2); }
+  .panel-head h2 { margin: 0; font-size: 14.5px; }
+  .panel-head .hint { color: var(--muted); font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 600; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; padding: 8px 14px; border-bottom: 1px solid var(--line-2); }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--line-2); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  tr.flash td { animation: flash 2.6s ease; }
+  @keyframes flash { 0%, 55% { background: var(--flash); } 100% { background: transparent; } }
+  .mono { font-family: "Cascadia Code", Consolas, Menlo, monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .nw { white-space: nowrap; }
+  .stockbar { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+  .stockbar .track { flex: 1; height: 6px; background: #efe9e2; border-radius: 999px; position: relative; overflow: visible; }
+  .stockbar .fill { height: 100%; border-radius: 999px; }
+  .stockbar .thr { position: absolute; top: -3px; width: 2px; height: 12px; background: #8f8478; border-radius: 1px; }
+  .stockbar b { width: 26px; text-align: right; font-size: 13px; }
+  .chip { display: inline-block; font-size: 11.5px; font-weight: 650; border-radius: 6px; padding: 1px 8px; white-space: nowrap; }
+  .chip.ok { color: var(--ok); background: var(--ok-bg); } .chip.low { color: var(--low); background: var(--low-bg); }
+  .chip.info { color: var(--info); background: var(--info-bg); } .chip.warn { color: var(--warn); background: var(--warn-bg); } .chip.mute { color: var(--muted); background: #f1ede7; }
+  .btn { border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 8px; padding: 6px 12px; font-weight: 550; font-size: 13px; white-space: nowrap; }
+  .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .btn.primary:hover { background: var(--brand-2); }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .alertcard { margin: 12px 14px 14px; border: 1px solid #f1c9c9; border-left: 4px solid var(--low); background: #fffafa; border-radius: 10px; padding: 10px 12px; font-size: 13px; animation: in .35s ease; }
+  .alertcard .t { display: flex; gap: 8px; align-items: center; font-weight: 650; margin-bottom: 4px; }
+  .alertcard pre { margin: 0; white-space: pre-wrap; font-family: "Cascadia Code", Consolas, Menlo, monospace; font-size: 12px; color: #4a3f36; }
+  .alertcard .s { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  @keyframes in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+  .chat { width: 370px; flex: none; background: var(--surface); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .chat-head { padding: 14px 16px; background: var(--brand); color: #fff; display: flex; gap: 10px; align-items: center; }
+  .chat-head .av { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.2); display: grid; place-items: center; font-weight: 700; }
+  .chat-head b { display: block; }
+  .chat-head span { font-size: 12px; opacity: .85; }
+  .chat-head .tag { margin-left: auto; font-size: 11px; background: rgba(255,255,255,.18); border-radius: 6px; padding: 2px 7px; }
+  .msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: #faf8f5; scroll-behavior: smooth; }
+  .m { max-width: 84%; padding: 8px 12px; border-radius: 14px; white-space: pre-wrap; animation: in .25s ease; font-size: 13.5px; }
+  .m.me { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+  .m.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .route { align-self: flex-start; font-size: 11.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; margin: -2px 0 4px 4px; }
+  .typing { align-self: flex-start; display: inline-flex; gap: 4px; padding: 11px 13px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: #b9ada0; animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 60%, 100% { opacity: .3; } 30% { opacity: 1; } }
+  .err { align-self: stretch; color: var(--low); background: var(--low-bg); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; }
+  .sugg { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 0; }
+  .sugg button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px; font-size: 12px; color: var(--brand); }
+  .sugg button:disabled { opacity: .5; cursor: default; }
+  .composer { display: flex; gap: 8px; padding: 10px 14px 14px; }
+  .composer input { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font: inherit; min-width: 0; color: var(--text); }
+  .composer input:focus { outline: 2px solid var(--brand-soft); border-color: var(--brand); }
+
+  @media (max-width: 1100px) { .nav { width: 64px; } .nav .store div:not(.mark), .nav a span, .nav .foot { display: none; } .kpis { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 820px) {
+    body { flex-direction: column; overflow: auto; }
+    .nav { display: none; }
+    .main { overflow: visible; padding: 16px; }
+    .panel { overflow-x: auto; }
+    .chat { width: auto; border-left: 0; border-top: 1px solid var(--line); height: 560px; }
+  }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="store"><div class="mark">C</div><div><span id="store-name">Store</span><small>Store admin</small></div></div>
+  <a class="on" href="#"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-5v-6h-2v6H6v-9H3z"/></svg><span>Home</span></a>
+  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z"/></svg><span>Orders</span></a>
+  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2l9 5v10l-9 5-9-5V7zm0 2.3L5.5 8 12 11.7 18.5 8z"/></svg><span>Products</span></a>
+  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/></svg><span>Customers</span></a>
+  <a href="#"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 4h16v12H7l-3 3z"/></svg><span>Support</span></a>
+  <div class="foot"><b>Data source</b><span id="source">...</span></div>
+</nav>
+
+<main class="main">
+  <div class="head">
+    <div><h1>Today</h1><div class="sub">The support agent answers customers from this data. The stock monitor watches it on a schedule.</div></div>
+    <span class="spacer"></span>
+    <span class="pill"><i></i><span id="model">model</span></span>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><span>Recent orders</span><b id="k-orders">0</b></div>
+    <div class="kpi"><span>Revenue</span><b id="k-rev">$0</b></div>
+    <div class="kpi alert"><span>Products low on stock</span><b id="k-low">0</b></div>
+    <div class="kpi" id="kpi-chats"><span>Customer messages handled</span><b id="k-chats">0</b></div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Inventory</h2><span class="hint">The marker on each bar is the product's restock threshold</span><span class="spacer"></span><button class="btn primary" id="monitor" type="button">Run stock monitor</button></div>
+    <table><thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Status</th><th>Price</th></tr></thead><tbody id="products"></tbody></table>
+    <div id="alert"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Orders</h2><span class="hint" id="policy"></span></div>
+    <table><thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th>Placed</th><th>Total</th></tr></thead><tbody id="orders"></tbody></table>
+  </section>
+</main>
+
+<aside class="chat">
+  <div class="chat-head"><div class="av">C</div><div><b>Customer support chat</b><span>What shoppers see on the storefront</span></div><span class="tag">AI agent</span></div>
+  <div class="msgs" id="msgs"><div class="m bot">Hi! Ask me about an order, a product or a return.</div></div>
+  <div class="sugg" id="sugg">
+    <button>Is the wool throw blanket in stock?</button>
+    <button>Where's my order ORD-3002?</button>
+    <button>I want to return ORD-3004</button>
+    <button>My order came broken, this is unacceptable</button>
+  </div>
+  <form class="composer" id="form" autocomplete="off"><input id="input" placeholder="Type a message" maxlength="2000"><button class="btn primary" id="send" type="submit">Send</button></form>
+</aside>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const ROUTES = {
+    order_status: ["info", "Order status", "looked up the order"],
+    stock_check: ["ok", "Stock check", "checked live inventory"],
+    return_refund: ["warn", "Returns", "checked the return policy"],
+    other: ["low", "Escalated", "created a ticket for a person"],
+  };
+  const STATUS = { Delivered: "ok", Shipped: "info", Processing: "mute", "Partially shipped": "info", Returned: "mute" };
+  let store = null, busy = false, handled = 0;
+  const session = Math.random().toString(36).slice(2, 12);
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function money(n) { return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function td(content, cls) { const c = el("td", cls); if (content instanceof Node) c.appendChild(content); else c.textContent = content; return c; }
+
+  function renderStore() {
+    $("store-name").textContent = store.name;
+    const pb = $("products"); pb.innerHTML = "";
+    const max = Math.max(...store.products.map((p) => Math.max(p.stock_count, p.low_stock_threshold))) * 1.1;
+    store.products.forEach((p) => {
+      const low = p.stock_count <= p.low_stock_threshold;
+      const tr = el("tr"); tr.dataset.name = p.name.toLowerCase(); tr.dataset.sku = p.sku;
+      const bar = el("div", "stockbar"); const track = el("div", "track"); const fill = el("div", "fill");
+      fill.style.width = (100 * p.stock_count / max) + "%"; fill.style.background = low ? "var(--low)" : "var(--ok)";
+      const thr = el("div", "thr"); thr.style.left = (100 * p.low_stock_threshold / max) + "%"; thr.title = "Restock at " + p.low_stock_threshold;
+      track.append(fill, thr); bar.append(el("b", null, String(p.stock_count)), track);
+      tr.append(td(p.name), td(p.sku, "mono"), td(bar), td(el("span", "chip " + (low ? "low" : "ok"), low ? "Low stock" : "In stock")), td(p.price != null ? money(p.price) : "-"));
+      pb.appendChild(tr);
+    });
+    const ob = $("orders"); ob.innerHTML = "";
+    store.orders.forEach((o) => {
+      const tr = el("tr"); tr.dataset.order = o.order_id;
+      tr.append(td(o.order_id, "mono"), td(o.customer), td(o.items.join(", ")), td(el("span", "chip " + (STATUS[o.status] || "mute"), o.status)), td(o.order_date, "nw"), td(money(o.amount)));
+      ob.appendChild(tr);
+    });
+    $("k-orders").textContent = store.orders.length;
+    $("k-rev").textContent = money(store.orders.reduce((s, o) => s + o.amount, 0)).replace(/\.00$/, "");
+    $("k-low").textContent = store.products.filter((p) => p.stock_count <= p.low_stock_threshold).length;
+    $("policy").textContent = "Return policy: " + store.policy.return_window_days + " days, for orders that are " + store.policy.returnable_statuses.join(" or ").toLowerCase();
+  }
+
+  function flash(rows) {
+    rows.forEach((r) => { r.classList.remove("flash"); void r.offsetWidth; r.classList.add("flash"); });
+    if (rows[0]) rows[0].scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  function highlightFor(data) {
+    const rows = [];
+    if (data.order_id) { const r = document.querySelector('tr[data-order="' + data.order_id + '"]'); if (r) rows.push(r); }
+    if (data.category === "stock_check") {
+      const reply = data.reply.toLowerCase();
+      document.querySelectorAll("#products tr").forEach((r) => { if (reply.includes(r.dataset.name)) rows.push(r); });
+    }
+    flash(rows);
+  }
+
+  function lock(v) { busy = v; $("send").disabled = v; document.querySelectorAll("#sugg button").forEach((b) => (b.disabled = v)); }
+
+  async function send(text) {
+    text = text.trim();
+    if (!text || busy) return;
+    lock(true);
+    const msgs = $("msgs");
+    msgs.appendChild(el("div", "m me", text));
+    const typing = el("div", "typing"); typing.append(el("i"), el("i"), el("i")); msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight; $("input").value = "";
+    try {
+      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ session_id: session, text }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Request failed (" + res.status + ")");
+      typing.remove();
+      const [cls, label, did] = ROUTES[data.category] || ROUTES.other;
+      const route = el("div", "route"); route.append(el("span", "chip " + cls, label), "Router " + did + " · " + data.seconds + "s");
+      msgs.append(el("div", "m bot", data.reply), route);
+      handled += 1; $("k-chats").textContent = handled;
+      const k = $("kpi-chats"); k.classList.remove("bump"); void k.offsetWidth; k.classList.add("bump");
+      highlightFor(data);
+    } catch (err) {
+      typing.remove(); msgs.appendChild(el("div", "err", err.message));
+    } finally {
+      lock(false); msgs.scrollTop = msgs.scrollHeight; $("input").focus();
+    }
+  }
+
+  $("form").addEventListener("submit", (e) => { e.preventDefault(); send($("input").value); });
+  $("sugg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) send(b.textContent); });
+  $("monitor").addEventListener("click", async () => {
+    const b = $("monitor"); b.disabled = true; b.textContent = "Checking...";
+    try {
+      const d = await (await fetch("/api/stock-check", { method: "POST" })).json();
+      const box = $("alert"); box.innerHTML = "";
+      const card = el("div", "alertcard");
+      if (!d.items.length) { card.appendChild(el("div", "t", "No items below their restock threshold.")); }
+      else {
+        const t = el("div", "t"); t.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="#c92a2a"><path d="M12 2L1 21h22zm1 16h-2v-2h2zm0-4h-2V9h2z"/></svg>'; t.append("Alert sent to the team");
+        card.append(t, el("pre", null, d.alert), el("div", "s", d.slack ? "Also " + d.slack + "." : "Set SLACK_WEBHOOK_URL to post this to a Slack channel. On a schedule, this runs as python stock_monitor.py."));
+        flash([...document.querySelectorAll("#products tr")].filter((r) => d.items.some((i) => i.sku === r.dataset.sku)));
+      }
+      box.appendChild(card);
+    } catch (err) { $("alert").textContent = "Stock check failed."; }
+    b.disabled = false; b.textContent = "Run stock monitor";
+  });
+
+  fetch("/api/info").then((r) => r.json()).then((d) => { $("model").textContent = d.model; $("source").textContent = d.source; }).catch(() => {});
+  fetch("/api/store").then((r) => r.json()).then((d) => { store = d; renderStore(); }).catch(() => {});
+})();
+</script>
+</body>
+</html>

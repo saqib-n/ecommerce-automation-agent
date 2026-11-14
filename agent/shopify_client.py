@@ -182,3 +182,28 @@ def low_stock_items(default_threshold: int = 10) -> list[dict]:
 
 def store_name() -> str:
     return _load("store_policy.json").get("store_name", "the store")
+
+
+def list_products() -> list[dict]:
+    """Every product with its stock, for the dashboard. Shopify products
+    get the same default threshold low_stock_items uses."""
+    return [{"low_stock_threshold": 10, **p} for p in _all_products()]
+
+
+def recent_orders(limit: int = 20) -> list[dict]:
+    """Most recent orders first, for the dashboard."""
+    if _shopify_configured():
+        orders = _shopify_get("orders", {"status": "any", "limit": limit}).get("orders", [])
+        return [
+            {
+                "order_id": order.get("name", ""),
+                "customer": (order.get("customer") or {}).get("first_name", "customer"),
+                "items": [line["title"] for line in order.get("line_items", [])],
+                "status": shopify_status(order.get("fulfillment_status")),
+                "order_date": order.get("created_at", "")[:10],
+                "amount": float(order.get("total_price", 0)),
+            }
+            for order in orders
+        ]
+    orders = [{"order_id": order_id, **order} for order_id, order in _mock_orders().items()]
+    return sorted(orders, key=lambda o: o["order_date"], reverse=True)[:limit]
